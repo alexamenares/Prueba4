@@ -1,83 +1,91 @@
-import datetime
-NORMAL = 1
-VIP = 2
 PALABRA_CLAVE = "EstoyEnListaDeReserva"
 STOCK_MAXIMO = 20
-reservas = []
+reservas = [] 
 
 def mostrar_menu():
-    print("\nTOTEM AUTOATENCIÓN RESERVA STRIKE")
+    print("TOTEM AUTOATENCIÓN RESERVA STRIKE")
     print("1.- Reservar zapatillas")
     print("2.- Buscar zapatillas reservadas")
     print("3.- Ver stock de reservas")
     print("4.- Salir")
 
-def reservar_zapatillas():
-    global reservas
+def total_pares_reservados():
+    return sum(r["pares"] for r in reservas)
 
-    if len(reservas) >= STOCK_MAXIMO:
-        print("No hay stock disponible.")
+def reservar_zapatillas():
+    print("Reservar Zapatillas")
+    if total_pares_reservados() >= STOCK_MAXIMO:
+        print("No hay stock disponible. No se puede hacer más reservas.")
         return
-    nombre = input("Ingrese nombre del comprador: ").strip().title()
+    nombre = input("Nombre del comprador: ").strip().title()
 
     for r in reservas:
         if r["nombre"] == nombre:
             print("Este comprador ya tiene una reserva registrada.")
             return
-    frase = input("Ingrese la frase secreta: ").strip()
+
+    frase = input("Digite la palabra secreta para confirmar la reserva: ").strip()
+
     if frase != PALABRA_CLAVE:
-        print("Frase secreta incorrecta. No se pudo realizar la reserva.")
+        print("Error: palabra clave incorrecta. Reserva no realizada.")
         return
+
     reservas.append({"nombre": nombre, "pares": 1})
-    print(f"Reserva exitosa para {nombre} (1 par de zapatillas).")
+    print(f"Reserva realizada exitosamente para {nombre}.")
+
 
 def buscar_reserva():
-    global reservas
-    nombre = input("Ingrese el nombre del comprador a buscar: ").strip().title()
+    print(" Buscar Zapatillas Reservadas")
+    nombre = input("Nombre del comprador a buscar: ").strip().title()
+
     for r in reservas:
         if r["nombre"] == nombre:
-            print(f"Reserva encontrada para {nombre}. Tiene {r['pares']} par(es) reservado(s).")
+            tipo = "VIP" if r["pares"] == 2 else "estándar"
+            print(f"Reserva encontrada: {nombre} - {r['pares']} par(es) ({tipo}).")
             if r["pares"] == 2:
-                print("Este usuario ya tiene una reserva VIP (2 pares).")
                 return
-            opcion = input("¿Desea pagar adicional para hacer reserva VIP (2 pares)? (s/n): ").lower()
-            if opcion == "s":
+
+            decision = input("¿Desea pagar adicional para VIP y reservar 2 pares? (s/n): ").strip().lower()
+            if decision in ["s", "si"]:
                 if total_pares_reservados() < STOCK_MAXIMO:
                     r["pares"] = 2
-                    print("Reserva VIP realizada exitosamente.")
+                    print(f"Reserva actualizada a VIP. Ahora {nombre} tiene 2 pares reservados.")
                 else:
-                    print("No hay stock suficiente para reserva VIP.")
+                    print("No hay stock suficiente para actualizar a VIP.")
             else:
-                print("No se realizó cambio a VIP.")
+                print("Manteniendo reserva actual.")
             return
+
     print("No se encontró ninguna reserva con ese nombre.")
 
 def ver_stock():
-    total_reservadas = total_pares_reservados()
-    print(f"\nTotal de pares reservados: {total_reservadas}")
-    print(f"Pares disponibles para reservar: {STOCK_MAXIMO - total_reservadas}")
-
-def total_pares_reservados():
-    return sum(r["pares"] for r in reservas)
+    print(" Ver Stock de Reservas")
+    reservados = total_pares_reservados()
+    disponibles = STOCK_MAXIMO - reservados
+    print(f"Pares reservados: {reservados}")
+    print(f"Pares disponibles: {disponibles}")
 
 def main():
     while True:
         mostrar_menu()
-        try:
-            opcion = int(input("Seleccione una opción: "))
-            if opcion == 1:
-                reservar_zapatillas()
-            elif opcion == 2:
-                buscar_reserva()
-            elif opcion == 3:
-                ver_stock()
-            elif opcion == 4:
-                fecha = datetime.datetime.now().strftime("%d/%m/%Y")
-                print(f"\nPrograma terminado... Fecha: {fecha}")
-                break
-            else:
-                print("Debe ingresar una opción válida!!")
-        except ValueError:
-            print("Debe ingresar un número válido!!")
+        opcion = input("Seleccione una opción (1-4): ").strip()
+
+        if not opcion.isdigit():
+            print("Debe ingresar una opción válida!!")
+            continue
+
+        opcion = int(opcion)
+
+        if opcion == 1:
+            reservar_zapatillas()
+        elif opcion == 2:
+            buscar_reserva()
+        elif opcion == 3:
+            ver_stock()
+        elif opcion == 4:
+            print("Programa terminado..")
+            break
+        else:
+            print("Debe ingresar una opción válida!!")
 
 main()
